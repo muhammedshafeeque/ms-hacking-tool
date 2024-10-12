@@ -11,6 +11,7 @@ import {
   IconButton,
 } from '@chakra-ui/react';
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
+import apiService from '../../Services/ApiService';
 
 function EnvironmentForm() {
   const [repoUrl, setRepoUrl] = useState('');
@@ -44,7 +45,7 @@ function EnvironmentForm() {
       : setExecutionScripts(updatedScripts);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     const data = {
       repoUrl,
@@ -53,7 +54,11 @@ function EnvironmentForm() {
       execution_script: executionScripts,
     };
     console.log(data);
-    // Send data to API endpoint
+    try {
+      let response=await apiService.createEnvironment(data)
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   return (

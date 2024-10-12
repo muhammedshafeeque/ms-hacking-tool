@@ -45,7 +45,7 @@ function Header() {
               mb={-2}
               onClick={()=>{navigate('/')}}
             >
-              Brand Name
+              Da Mone ...!
             </Heading>
             <Text
               fontSize="md"
@@ -53,7 +53,7 @@ function Header() {
               color="text"
               letterSpacing="wide"
             >
-              Tagline or slogan
+              
             </Text>
           </Flex>
           <Flex align="center" justify="flex-end">

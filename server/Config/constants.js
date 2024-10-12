@@ -14,4 +14,7 @@ export const replacement = [
   { replace: "<ip address>", value: "ip" },
   { replace: "<port>", value: "port" },
   { replace: "<url>", value: "url" },
+  { replace: "url", value: "url" },
+  { replace: "ip", value: "ip" },
+  { replace: "port", value: "port" },
 ];

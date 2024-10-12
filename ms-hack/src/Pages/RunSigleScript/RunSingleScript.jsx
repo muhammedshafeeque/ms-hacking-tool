@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   FormLabel,
   FormControl,
@@ -8,36 +9,52 @@ import {
   Flex,
   Heading,
   Container,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import apiService from "../../Services/ApiService";
+import { useParams } from "react-router-dom";
+import ResultPopup from "../../Components/ResultPopup/ResultPopup";
 
 function ScriptRunForm() {
-  const [scriptName, setScriptName] = useState("");
-  const [command, setCommand] = useState("");
-  const [ip, setIp] = useState("");
-  const [port, setPort] = useState("");
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm();
+  const [response,setResponse]=useState(null)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const response = await apiService.getScriptById(id);
+        setValue("name", response.name);
+        setValue("comment", response.comment);
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+      }
+    };
+
+    if (id) {
+      fetchInitialData();
+    }
+  }, [id, setValue]);
+
+  const onSubmit = async (data) => {
     try {
-      const data = {
-        scriptName,
-        command,
-        ip: ip.trim() !== "" ? ip : null,
-        port: port.trim() !== "" ? port : null,
-        url: url.trim() !== "" ? url : null,
+      const formattedData = {
+        ...data,
+        ip: data.ip?.trim() !== "" ? data.ip : null,
+        port: data.port?.trim() !== "" ? data.port : null,
+        url: data.url?.trim() !== "" ? data.url : null,
+        script:id
       };
-      const response = await apiService.runScript(data);
-      console.log(response);
-      // Handle success response
+      const response = await apiService.runScript(formattedData);
+      setResponse(response); 
     } catch (error) {
       console.error(error);
       // Handle error response
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -48,55 +65,65 @@ function ScriptRunForm() {
           Run Script
         </Heading>
       </Flex>
-      <form onSubmit={handleSubmit}>
-        <FormControl isRequired mb={4}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormControl isInvalid={errors.name} mb={4}>
           <FormLabel>Script Name</FormLabel>
           <Input
-            type="text"
-            value={scriptName}
-            onChange={(e) => setScriptName(e.target.value)}
-            placeholder="Enter script name"
+            {...register("name", { required: "Script name is required" })}
+            isDisabled
           />
+          <FormErrorMessage>
+            {errors.name && errors.name.message}
+          </FormErrorMessage>
         </FormControl>
-        <FormControl isRequired mb={4}>
+        <FormControl isInvalid={errors.comment} mb={4}>
           <FormLabel>Command</FormLabel>
           <Textarea
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-            placeholder="Enter command"
+            {...register("comment", { required: "Command is required" })}
           />
+          <FormErrorMessage>
+            {errors.comment && errors.comment.message}
+          </FormErrorMessage>
         </FormControl>
         <FormControl mb={4}>
           <FormLabel>IP (Optional)</FormLabel>
-          <Input
-            type="text"
-            value={ip}
-            onChange={(e) => setIp(e.target.value)}
-            placeholder="Enter IP address"
-          />
+          <Input {...register("ip")} placeholder="Enter IP address" />
         </FormControl>
         <FormControl mb={4}>
           <FormLabel>Port (Optional)</FormLabel>
           <Input
-            type="number"
-            value={port}
-            onChange={(e) => setPort(e.target.value)}
+            {...register("port", {
+              pattern: {
+                value: /^\d*$/,
+                message: "Please enter a valid port number",
+              },
+            })}
             placeholder="Enter port number"
           />
+          <FormErrorMessage>
+            {errors.port && errors.port.message}
+          </FormErrorMessage>
         </FormControl>
         <FormControl mb={4}>
           <FormLabel>URL (Optional)</FormLabel>
           <Input
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            {...register("url", {
+              pattern: {
+                value: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
+                message: "Please enter a valid URL",
+              },
+            })}
             placeholder="Enter URL"
           />
+          <FormErrorMessage>
+            {errors.url && errors.url.message}
+          </FormErrorMessage>
         </FormControl>
-        <Button type="submit" colorScheme="blue" isLoading={loading}>
+        <Button type="submit" colorScheme="blue" isLoading={isSubmitting}>
           Run Script
         </Button>
       </form>
+      <ResultPopup response={response} />
     </Container>
   );
 }

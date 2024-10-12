@@ -40,6 +40,24 @@ const apiService = {
       console.error('Error fetching script:', error);
       throw error;
     }
+  },
+  runScript:async(data)=>{
+    try {
+      const response = await axiosInstance.post(`/ex/execute`,data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching script:', error);
+      throw error;
+    }
+  },
+  createEnvironment:async(data)=>{
+    try {
+      const response = await axiosInstance.post(`/script/clone-repo`,data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching script:', error);
+      throw error;
+    }
   }
 };
 

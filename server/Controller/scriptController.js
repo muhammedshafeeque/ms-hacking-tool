@@ -98,3 +98,17 @@ export const getScripts = async (req, res, next) => {
 export const getScriptTypes = (req, res, next) => {
   res.send(convertObjectToArray(scriptTypes));
 };
+
+export const getScriptById = async (req, res, next) => {
+  try {
+    let scriptId = req.params.id;
+    let script = await SCRIPT.findById(scriptId);
+    if (!script) {
+      return res.status(404).send({ message: "Script not found" });
+    }
+
+    res.send(script);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -10,7 +10,7 @@ export const executeScript = async (req, res, next) => {
     if (script.environment) {
       let envCommands = await SCRIPT.find({
         environment: script.environment._id,
-        scriptType: scriptTypes.ENV,
+        scriptType: scriptTypes.ENV, 
       });
       if (envCommands.length) {
         for (let i = 0; i < envCommands.length; i++) {
@@ -41,7 +41,11 @@ export const executeScript = async (req, res, next) => {
     }
     let terminal = await executeCommands(
       commands,
-      req.body.target && req.body.target
+      {
+        ip:req.body.ip,
+        port:req.body.port,
+        url:req.body.url
+      }
     );
     res.send(terminal);
   } catch (error) {
